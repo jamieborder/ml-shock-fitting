@@ -8,21 +8,6 @@ if len(sys.argv) < 2:
 
 
 # now generate starting shock and circle of radius 1:
-m = 3
-
-t = np.zeros((1,m+1))
-A = np.zeros((m+1,m+1))
-
-A[0,0] =  1.0
-A[1,0] = -3.0
-A[1,1] =  3.0
-A[2,0] =  3.0
-A[2,1] = -6.0
-A[2,2] =  3.0
-A[3,0] = -1.0
-A[3,1] =  3.0
-A[3,2] = -3.0
-A[3,3] =  1.0
 
 op = np.zeros((m+1,2))
 r = 1
@@ -37,8 +22,6 @@ ip[0,:] = [-r, 0]
 ip[1,:] = [-r, K*r]
 ip[2,:] = [-K*r, r]
 ip[3,:] = [ 0, r]
-
-B = lambda t,P: (np.array([[1,t,t**2,t**3]]) @ A @ P)[0,:]
 
 ts = np.linspace(0,1,100)
 ol = np.array([B(t,op) for t in ts])
