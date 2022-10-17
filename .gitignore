@@ -2,3 +2,4 @@ runs/data/*.dat
 runs/old-runs/*
 *__pycache__*
 runner/*
+*.swp
