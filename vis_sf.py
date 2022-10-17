@@ -3,10 +3,13 @@ import numpy as np
 import sys
 import matplotlib.cm as cm
 
+sys.path.append('..')
 from bezier import *
 
 if len(sys.argv) < 2:
-    print('python3 vis.py {:06d}')
+    print('python3 vis.py [i [path]]')
+    print('python3 vis.py [i,j,... [path]]')
+    print('python3 vis.py [i:k [path]]')
 
 ts = np.linspace(0,1,100)
 R1 = 1

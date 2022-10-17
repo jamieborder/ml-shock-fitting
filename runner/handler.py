@@ -18,7 +18,7 @@ Tmax = 800.0
 # R1 constant, 1.0
 # R2, K1, K2 randomnly set
 
-var = '_7'
+var = '_13'
 # var = ''
 
 tmp = 'tmp' + var
@@ -45,9 +45,18 @@ for i in range(nsims):
     stat.write(f'{i:4d} @ {now}...\n')
     #
     # generate random params for Bezier curve representing geometry
-    R2 = rng.random() * 0.2 + 0.9
-    K1 = rng.random()
-    K2 = rng.random() * 0.8
+    # R2 = rng.random() * 0.2 + 0.9
+    # K1 = rng.random()
+    # K2 = rng.random() * 0.8
+    # R2 = rng.random() * 0.3 + 0.9
+    # K1 = rng.random() * 1.1
+    # K2 = rng.random()
+    # R2 = rng.random() * 0.3 + 0.9
+    # K1 = rng.random() * 1.1
+    # K2 = rng.random() * 0.2
+    R2 = rng.random() * 0.3 + 0.9
+    K1 = rng.random() * 0.3
+    K2 = rng.random() * 0.3
     M  = rng.random() * (Mmax - Mmin) + Mmin
     T  = rng.random() * (Tmax - Tmin) + Tmin
     # record those params in a file for sim
