@@ -5,7 +5,7 @@ Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting
 
 # Dependencies
 - python 3
-- [Eilmer link](https://github.com/gdtk-uq/gdtk)  
+- [Eilmer](https://github.com/gdtk-uq/gdtk)  
 - [PyTorch](https://pytorch.org/)  
 
 ## Randomised parameter bounds
