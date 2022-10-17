@@ -12,13 +12,9 @@ nsims = 100
 Mmin = 2.0
 Mmax = 8.0
 
-Tmin = 300.0
-Tmax = 800.0
+# R1, R2, K1, K2 randomnly set
 
-# R1 constant, 1.0
-# R2, K1, K2 randomnly set
-
-var = '_13'
+var = '_14'
 # var = ''
 
 tmp = 'tmp' + var
@@ -45,27 +41,34 @@ for i in range(nsims):
     stat.write(f'{i:4d} @ {now}...\n')
     #
     # generate random params for Bezier curve representing geometry
+    #
     # R2 = rng.random() * 0.2 + 0.9
     # K1 = rng.random()
     # K2 = rng.random() * 0.8
+    #
     # R2 = rng.random() * 0.3 + 0.9
     # K1 = rng.random() * 1.1
     # K2 = rng.random()
+    #
     # R2 = rng.random() * 0.3 + 0.9
     # K1 = rng.random() * 1.1
     # K2 = rng.random() * 0.2
-    R2 = rng.random() * 0.3 + 0.9
+    #
+    # T  = rng.random() * (Tmax - Tmin) + Tmin
+    #
+    R1 = rng.random() * 0.4 + 0.8
+    R2 = rng.random() * 0.6 + 0.6
     K1 = rng.random() * 0.3
     K2 = rng.random() * 0.3
+    #
     M  = rng.random() * (Mmax - Mmin) + Mmin
-    T  = rng.random() * (Tmax - Tmin) + Tmin
     # record those params in a file for sim
     with open(f'{tmp}/input.lua','w') as f:
+        f.write(f'R1 = {R1}\n')
         f.write(f'R2 = {R2}\n')
         f.write(f'K1 = {K1}\n')
         f.write(f'K2 = {K2}\n')
         f.write(f'M  = {M}\n')
-        f.write(f'T  = {T}\n')
         f.close()
     #
     res = os.popen(f'cd {tmp} && bash run.sh').read()

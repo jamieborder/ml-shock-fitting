@@ -13,13 +13,13 @@ config.dimensions = 2
 
 -- problem parameters
 
---dofile('/home/jamie/work/scratch/shock-fitting/eilmer-shock-fitting/cylinder2/input.lua')
 dofile('input.lua')
 -- loading
--- R2,K1,K2,M,T
+-- R1,R2,K1,K2,M
 
 nsp, nmodes, gm = setGasModel('ideal-air-gas-model.lua')
 p = 100.0e3
+T = 300.0
 
 Q = GasState:new{gm}
 Q.p = p
@@ -33,17 +33,15 @@ u_inf = M * a_inf
 initial = FlowState:new{p=p/3.0, T=2.0*T/3.0, velx=0.0, vely=0.0}
 inflow = FlowState:new{p=p, T=T, velx=u_inf, vely=0.0}
 
-radius = 1.0    -- m
-
-a  = Vector3:new{x=-radius, y=0.0}
-b1 = Vector3:new{x=-radius, y=K1*radius}
+a  = Vector3:new{x=-R1, y=0.0}
+b1 = Vector3:new{x=-R1, y=K1*R1}
 b2 = Vector3:new{x=-K2*R2, y=R2}
 c  = Vector3:new{x=0.0, y=R2}
 
-d = Vector3:new{x=-2*radius, y=0}
-e = Vector3:new{x=-2*radius, y=radius}
-f = Vector3:new{x=-radius, y=2.5*radius}
-g = Vector3:new{x=0.0, y=3.0*radius}
+d = Vector3:new{x=-2*R1, y=0}
+e = Vector3:new{x=-2*R1, y=R1}
+f = Vector3:new{x=-R1, y=2.5*R1}
+g = Vector3:new{x=0.0, y=3.0*R1}
 
 psurf = makePatch{north=Line:new{p0=g, p1=c},
 		  east=Bezier:new{points={a,b1,b2,c}},
