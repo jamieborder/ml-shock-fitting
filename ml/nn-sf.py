@@ -26,6 +26,8 @@ from torch.autograd import Variable
 sys.path.append('..')
 from bezier import genBezierPoints
 
+plt.rcParams['font.size'] = 16
+
 class Scale():
     def __init__(self):
         self.max = 1.0
@@ -98,7 +100,7 @@ class SFModel():
         # 2. define the loss function
         self.critereon = MSELoss()
         # 3. define the optimizer
-        self.optimizer = SGD(self.model.parameters(), lr=0.1)
+        self.optimizer = SGD(self.model.parameters(), lr=0.2)
         # 4. define the number of epochs
         self.nb_epochs = epochs
         # historic error norm data
@@ -225,6 +227,8 @@ class SFModel():
 
 if __name__ == "__main__":
 
+    #{GPU=1} python3 nn-sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
+
     # grab training data filename
     if (len(sys.argv) < 2):
         print("NOTE: no training data file provided.")
@@ -239,7 +243,7 @@ if __name__ == "__main__":
     enable_gpu = os.getenv('GPU') != None
 
     # load the training data
-    sf_model = SFModel(filenames, 50000, enable_gpu)
+    sf_model = SFModel(filenames, 100000, enable_gpu)
 
     # scale the training data
     sf_model.scale_data()
@@ -255,8 +259,12 @@ if __name__ == "__main__":
 
     # test the model
     # input params: R2,K1,K2,M,T
+
+    # this case doesn't fit that well
     lparams = '1.024010845383956037e+00 5.559842733496153100e-01 2.493385792650427979e-01 7.985859177691415844e+00 6.662489193564000516e+02'
     lcoeffs = '1.329053681099242601e+00 -2.381378425592319166e-03 1.815951977252002747e-01 -7.257403682239993437e-02 2.686813008048670737e-01 -1.739286381676704019e-01 5.769665095911536562e-02'
+
+    # this one fits quite well
     # lparams = '1.031934264169858340e+00 4.557829600792653313e-01 5.861211734777412863e-01 4.867340185411659803e+00 3.623606666529556151e+02'
     # lcoeffs = '1.493551514491779475e+00 -4.820248358711151995e-03 3.362109836934503715e-01 -1.457855463284446484e-01 3.143132348758396755e-01 -1.968522945545726766e-01 6.791856727176236175e-02'
 
@@ -277,13 +285,12 @@ if __name__ == "__main__":
     for i in range(len(coeffs)):
         es += coeffs[i] * thetas**i
 
+    tcm = cm.turbo(np.linspace(0.2,0.6,5))
+
     # and plotting them
     plt.figure(2)
-    plt.plot(thetas,ps,'bo-',label='prediction')
-    plt.plot(thetas,es,'k.-',label='simulation')
-    plt.legend(loc='best')
-    plt.show(block=False)
-    # plt.show()
+    plt.plot(thetas,ps,'o-',label='prediction',c=tcm[0],mfc='none')
+    plt.plot(thetas,es,'.-',label='simulation',c=tcm[2])
 
     # also map from polar to cartesian to visualise proper shock shape
     # x = r cos(theta)
@@ -295,9 +302,8 @@ if __name__ == "__main__":
 
     # and plotting them
     plt.figure(3)
-    plt.plot(xps,yps,'bo-',label='prediction')
-    plt.plot(xes,yes,'k.-',label='simulation')
-    # plt.show()
+    plt.plot(xps,yps,'o-',label='prediction',c=tcm[0],mfc='none')
+    plt.plot(xes,yes,'.-',label='simulation',c=tcm[2])
 
     # it is a bit awkard but we can create a Bezier curve of the surface
     #  from the input params in cartesian space, and then map them to polar
@@ -311,18 +317,14 @@ if __name__ == "__main__":
     p[1,:] = [-R1, K1*R1]
     p[2,:] = [-K2*R2, R2]
     p[3,:] = [ 0, R2]
-    print(p)
-    print(p.shape)
     ts = np.linspace(0,1,thetas.shape[0])
-    print(ts.shape)
     xy = genBezierPoints(p,ts.shape[0])
     
     # plot in cartesian space
     plt.figure(3)
     plt.plot(xy[:,0],xy[:,1],'k.-',label='surface')
-    plt.axis('equal')
-    plt.legend(loc='best')
-    plt.show(block=False)
+    plt.plot([xy[0,0],xes[0]],[xy[0,1],yes[0]],'-',c=tcm[2],zorder=0)
+    plt.plot([xy[-1,0],xes[-1]],[xy[-1,1],yes[-1]],'-',c=tcm[2],zorder=0)
 
     # and map to polar
     #   theta = arctan(y/x)
@@ -333,8 +335,6 @@ if __name__ == "__main__":
     # and plot
     plt.figure(2)
     plt.plot(stheta,sr,'k.-',label='surface')
-    plt.legend(loc='best')
-    plt.show(block=False)
 
 
     abs_error = np.sum(np.abs(ps - es))
@@ -345,4 +345,22 @@ if __name__ == "__main__":
     # visualise the model
     # sf_model.visualise_model(1.5, 5.0, 5.0, 45.0, 100)
 
+plt.figure(2)
+plt.title('polar domain')
+plt.xlim(0,np.pi/2)
+plt.xlabel('theta')
+plt.ylabel('radius')
+plt.xticks([i*np.pi/8 for i in range(5)],
+['0',r'$\frac{\pi}{8}$',r'$\frac{1\pi}{4}$',r'$\frac{3\pi}{8}$',r'$\frac{\pi}{2}$'])
+plt.legend(loc='best')
+
+plt.figure(3)
+plt.title('cartesian domain')
+plt.axis('equal')
+plt.legend(loc='best')
+plt.xlabel('x')
+plt.ylabel('y')
+
+plt.show(block=False)
+# plt.show()
 plt.show()
