@@ -3,7 +3,7 @@ Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting
     --> bow shock profile + ML  
         --> general relation for shape for grid gen?
 
-# Dependencies
+## Dependencies
 - python 3
 - [Eilmer](https://github.com/gdtk-uq/gdtk)  
 - [PyTorch](https://pytorch.org/)  
