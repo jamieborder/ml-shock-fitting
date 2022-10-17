@@ -1,7 +1,7 @@
 # ML-SF
-Randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting  
-    -> bow shock profile + ML  
-        -> general relation for shape for grid gen?
+Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting  
+    --> bow shock profile + ML  
+        --> general relation for shape for grid gen?
 
 ## Randomised parameter bounds
 Mach number -> [2.0, 8.0]  
@@ -10,7 +10,7 @@ temperature -> [300.0, 800.0] K
 R1 constant, 1.0  
 R2, K1, K2 randomly set around 1.0
 
-# Example from fit model
+## Example from fit model
 R1 = 1.0  
 R2 = 1.024010845383956037e+00  
 K1 = 5.559842733496153100e-01  
