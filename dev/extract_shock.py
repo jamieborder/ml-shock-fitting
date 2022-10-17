@@ -8,6 +8,8 @@ plt.rcParams['font.size'] = 16
 # for dev
 from matplotlib.pyplot import *
 
+# assuming pos contains coords for entire block which contains the full shock shape...
+
 # -1.444847941398620605e+00 0.000000000000000000e+00 0.000000000000000000e+00
 pos = np.loadtxt('pos.dat')
 
