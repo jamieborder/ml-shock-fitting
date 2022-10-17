@@ -93,13 +93,10 @@ class BetaShockModel():
         self.error_norm = []
 
     def read_data(self, filename):
-        with open(filename, 'r') as f:
-            data = f.readlines()
-            for line in data:
-                dat = line.split()
-                self.theta.data = np.append(self.theta.data, float(dat[0]))
-                self.beta.data = np.append(self.beta.data, float(dat[1]))
-                self.M.data = np.append(self.M.data, float(dat[2]))
+        data = np.loadtxt(filename)
+        self.theta.data = data[:,0]
+        self.beta.data  = data[:,1]
+        self.M.data     = data[:,2]
 
     def scale_data(self):
         self.theta.scale.min_max_mean(self.theta.data)
@@ -111,13 +108,18 @@ class BetaShockModel():
         self.scaled_data = True
 
     def convert_data_to_tensor(self):
+        print('theta:', self.theta.data.shape)
+        print('M    :', self.M.data.shape)
         self.X = np.array((self.theta.data,self.M.data)).T
+        print('X    :', self.X.shape)
         self.X = Variable(Tensor(self.X))
         self.y = self.beta.data
+        print('y    :', self.y.shape)
         self.y = Variable(Tensor(self.y))
         if (self.enable_gpu):
             self.X = self.X.cuda()
             self.y = self.y.cuda()
+        # exit()
 
     def train_model(self):
         for epoch in range(self.nb_epochs):
@@ -145,6 +147,9 @@ class BetaShockModel():
             self.model.cpu()
         beta_pred = self.model(Variable(Tensor([scaled_theta, scaled_M])))
         scaled_beta_pred = self.beta.scale.denormalize(float(beta_pred.data[0]))
+        print('beta_pred:', beta_pred.shape)
+        print('scaled_beta_pred:', scaled_beta_pred.shape)
+        exit()
         return scaled_beta_pred
 
     def plot_error(self):
@@ -226,7 +231,7 @@ if __name__ == "__main__":
     enable_gpu = os.getenv('GPU') != None
 
     # load the training data
-    thetaBetaM = BetaShockModel(filename, 5000, enable_gpu)
+    thetaBetaM = BetaShockModel(filename, 500, enable_gpu)
 
     # scale the training data
     thetaBetaM.scale_data()
