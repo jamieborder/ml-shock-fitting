@@ -31,8 +31,15 @@ else:
     ns = [i for i in range(100)]
     paths = ['data/','data_/','data_1/','data_2/','data_3/','data_4/','data_6/']
 
-bcm = cm.coolwarm(np.linspace(0,0.45,len(ns)))
-rcm = cm.coolwarm(np.linspace(0.55,1,len(ns)))
+bcm = cm.turbo(np.linspace(0.1,0.40,len(ns)))
+rcm = cm.turbo(np.linspace(0.60,0.9,len(ns)))
+# bcm = cm.gray(np.linspace(0,0.45,len(ns)))
+# rcm = cm.turbo(np.linspace(0.2,0.5,len(ns)))
+# bcm = cm.turbo(np.linspace(0.2,0.5,len(ns)))
+# rcm = cm.turbo(np.linspace(0.1,0.9,len(ns)))
+# bcm = cm.turbo(np.linspace(0.1,0.9,len(ns)))
+np.random.shuffle(rcm)
+np.random.shuffle(bcm)
 
 for path in paths:
     # path = 'data/'
@@ -53,7 +60,7 @@ for path in paths:
 
         res = np.loadtxt(resf,skiprows=1)
 
-        plt.figure(1)
+        plt.figure(1,figsize=(6,10))
         # plt.plot(dat[:,0],dat[:,1],'-',c=f'C{i}')
         plt.plot(dat[:,0],dat[:,1],'-',c=rcm[i])
 
@@ -73,6 +80,9 @@ for path in paths:
         # plt.plot( p[:,0], p[:,1],'o',c=f'C{i}')
         plt.plot(xy[:,0],xy[:,1],'-',c=bcm[i])
         plt.plot( p[:,0], p[:,1],'o',c=bcm[i])
+        #
+        plt.plot([p[0,0],dat[0,0]],[p[0,1],dat[0,1]],'-',c=rcm[i])
+        plt.plot([p[-1,0],dat[-1,0]],[p[-1,1],dat[-1,1]],'-',c=rcm[i])
 
 
 # generate starting shock and circle of radius 1:
@@ -93,10 +103,24 @@ il = genBezierPoints(ip,ts.shape[0])
 
 
 plt.figure(1)
-plt.plot(il[:,0],il[:,1],'k-',lw=3)
-plt.plot(ol[:,0],ol[:,1],'k-',lw=3)
-plt.plot(ip[:,0],ip[:,1],'ko')
-plt.plot(op[:,0],op[:,1],'ko')
-plt.axis('equal')
+if False:
+    plt.plot(il[:,0],il[:,1],'k-',lw=3)
+    plt.plot(ol[:,0],ol[:,1],'k-',lw=3)
+    plt.plot(ip[:,0],ip[:,1],'ko')
+    plt.plot(op[:,0],op[:,1],'ko')
+    plt.plot([ip[0,0],op[0,0]],[ip[0,1],op[0,1]],'k-',lw=2)
+    plt.plot([ip[-1,0],op[-1,0]],[ip[-1,1],op[-1,1]],'k-',lw=2)
+
+# plt.axis('equal')
+plt.axis('square')
 # plt.show(block=False)
+
+plt.xlim(-2.5,0.2)
+# plt.ylim(-0.2,6.0)
+plt.tight_layout()
+plt.savefig('tmp.svg')
+
+plt.xlim(-1.2,0.05)
+plt.ylim(-0.05,1.2)
+plt.savefig('tmpz.svg')
 plt.show()

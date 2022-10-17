@@ -3,3 +3,4 @@ runs/old-runs/*
 *__pycache__*
 runner/*
 *.swp
+*slides.*

@@ -3,6 +3,10 @@ Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting
     --> bow shock profile + ML  
         --> general relation for shape for grid gen?
 
+# Dependencies
+Eilmer: [eilmer link](https://github.com/gdtk-uq/gdtk)  
+PyTorch: [pytorch link](https://pytorch.org/)  
+
 ## Randomised parameter bounds
 Mach number -> [2.0, 8.0]  
 temperature -> [300.0, 800.0] K
