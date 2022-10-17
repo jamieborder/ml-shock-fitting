@@ -1,15 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
+import os
 
-if len(sys.argv) < 2:
-    print('python3 vis.py {:06d}[,...]')
-    # exit()
-
-# loading a number of data files in this folder
-# ns = [int(i) for i in sys.argv[1].split(',') if i != '']
-ns = [i for i in range(8)]
-ld = 'data_/'
+ld = 'runs/data/'
 
 # plot_them = True
 plot_them = False
@@ -18,10 +11,15 @@ params = np.empty([0,5])
 shapes = np.empty([0,41*2])
 coeffs = np.empty([0,7])
 
-for i,idx in enumerate(ns):
-    # idx = int(sys.argv[-1])
-
-    datf = ld + f'run{idx:06d}.dat'
+# loading all of them
+res = os.popen(f'ls {ld}').read().strip().split('\n')
+i = -1
+for name in res:
+    if 'run' in name:
+        datf = ld + name
+        i += 1
+    else:
+        continue
 
     f = open(datf,'r')
     R2 = float(f.readline().strip().replace(' ','').split('=')[-1])
@@ -33,10 +31,6 @@ for i,idx in enumerate(ns):
     params = np.vstack((params,np.array([[R2,K1,K2,M,T]])))
     # shapes = np.vstack((shapes,dat.flatten()[None,:]))
     shapes = np.vstack((shapes,dat.T.flatten()[None,:]))
-
-    # don't think this residual is needed
-    # resf = f'res{idx:06d}.dat'
-    # res = np.loadtxt(resf,skiprows=1)
 
     # should input to NN be Bezier params or actual points?
     # or poly coeffs?
@@ -53,10 +47,6 @@ for i,idx in enumerate(ns):
 
     theta = -np.arctan(dat[:,1] / (dat[:,0]-1e-16))
     r = (dat[:,0]**2 + dat[:,1]**2)**0.5
-    # plt.plot(theta,r,'k*-')
-    # plt.plot(dat[:,0],dat[:,1],'r.-')
-
-    phi = 4.0 * theta / np.pi - 1.0
 
     N = r.shape[0]
 
@@ -109,10 +99,13 @@ for i,idx in enumerate(ns):
         plt.plot(theta,r ,'k.-',ms=12)
         print(np.sum(np.abs(f-r)),np.sum(np.abs(fc-r)))
 
-    # STUFF IS WRONG! ALSO NEED TO CALCULATE BEZIER AND MAP THEM
-    # TO THIS DOMAIN
-
     coeffs = np.vstack((coeffs,cs.T))
 
 if plot_them:
     plt.show(block=False)
+
+# save data to file
+if False:
+    np.savetxt('runs/data/params.dat',params)
+    np.savetxt('runs/data/shapes.dat',shapes)
+    np.savetxt('runs/data/coeffs.dat',coeffs)
