@@ -14,7 +14,7 @@ Mmax = 8.0
 
 # R1, R2, K1, K2 randomnly set
 
-var = '_14'
+var = '_17'
 # var = ''
 
 tmp = 'tmp' + var

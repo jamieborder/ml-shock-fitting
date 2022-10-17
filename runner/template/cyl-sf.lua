@@ -63,14 +63,14 @@ identifyBlockConnections()
 -- Set a few more config options
 config.flux_calculator = "ausmdv"
 config.gasdynamic_update_scheme = "backward_euler"
--- config.max_time = (radius*2)/u_inf * 20
-config.max_time = (radius*2)/u_inf * 200
+-- config.max_time = (R1*2)/u_inf * 20
+config.max_time = (R1*2)/u_inf * 200
 config.max_step = 4000000
 config.cfl_value = 0.5
 config.dt_init = 1e-7
 config.dt_plot = config.max_time
 config.grid_motion = "shock_fitting"
-config.shock_fitting_delay = (radius*2)/u_inf  -- allow for one flow length
+config.shock_fitting_delay = (R1*2)/u_inf  -- allow for one flow length
 config.max_invalid_cells = 10
 config.adjust_invalid_cell_data = true
 config.report_invalid_cells = false
