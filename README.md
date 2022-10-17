@@ -4,8 +4,9 @@ Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting
         --> general relation for shape for grid gen?
 
 # Dependencies
-Eilmer: [eilmer link](https://github.com/gdtk-uq/gdtk)  
-PyTorch: [pytorch link](https://pytorch.org/)  
+- python 3
+- [Eilmer link](https://github.com/gdtk-uq/gdtk)  
+- [PyTorch](https://pytorch.org/)  
 
 ## Randomised parameter bounds
 Mach number -> [2.0, 8.0]  
