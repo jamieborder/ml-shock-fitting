@@ -72,7 +72,7 @@ if __name__ == "__main__":
     tcm = cm.turbo(np.linspace(0.2,0.6,5))
 
     # and plotting them
-    plt.figure(2)
+    plt.figure(2,figsize=(8,8))
     plt.plot(thetas,ps,'o-',label='prediction',c=tcm[0],mfc='none')
     plt.plot(thetas,es,'.-',label='simulation',c=tcm[2])
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     yes =  es * np.sin(thetas)
 
     # and plotting them
-    plt.figure(3)
+    plt.figure(3,figsize=(8,8))
     plt.plot(xps,yps,'o-',label='prediction',c=tcm[0],mfc='none')
     plt.plot(xes,yes,'.-',label='simulation',c=tcm[2])
 
@@ -129,8 +129,8 @@ if __name__ == "__main__":
     # visualise the model
     # sf_model.visualise_model(1.5, 5.0, 5.0, 45.0, 100)
 
-    plt.figure(2,figsize=(8,8))
-    plt.title('polar domain')
+    plt.figure(2)
+    plt.title('polar coordinates')
     plt.xlim(0,np.pi/2)
     plt.xlabel('theta')
     plt.ylabel('radius')
@@ -138,8 +138,8 @@ if __name__ == "__main__":
     ['0',r'$\frac{\pi}{8}$',r'$\frac{1\pi}{4}$',r'$\frac{3\pi}{8}$',r'$\frac{\pi}{2}$'])
     plt.legend(loc='best')
 
-    plt.figure(3,figsize=(8,8))
-    plt.title('cartesian domain')
+    plt.figure(3)
+    plt.title('cartesian coordinates')
     plt.axis('equal')
     plt.legend(loc='best')
     plt.xlabel('x')
@@ -161,6 +161,10 @@ if __name__ == "__main__":
         plt.figure(3)
         plt.plot(p[:,0,0],p[:,0,1],'s-',c=tcm[2])
 
+# plt.figure(3)
+# plt.savefig('examples/ex3/pred_cartesian.png',dpi=300)
+# plt.figure(2)
+# plt.savefig('examples/ex3/pred_polar.png',dpi=300)
 
 # plt.show(block=False)
 plt.show()
