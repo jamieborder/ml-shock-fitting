@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# nn-sf.py
+# nn_sf.py
 #  from template: nn-ThetaBetaM.py
 #
 # input: theta-beta-M training data
@@ -40,14 +40,14 @@ class Scale():
         self.mean = np.mean(data);
 
     def normalize(self, data):
-        if (type(data) == float or type(data) == np.float64):
+        if type(data) == float or type(data) == np.float64:
             data = (data-self.mean)/(self.max-self.min)
             return data
         else:
             data[:] = (data-self.mean)/(self.max-self.min)
 
     def denormalize(self, data):
-        if (type(data) == float or type(data) == np.float64):
+        if type(data) == float or type(data) == np.float64:
             data = data*(self.max-self.min)+self.mean
             return data
         else:
@@ -74,7 +74,7 @@ class Net(torch.nn.Module):
         return x
 
 class SFModel():
-    def __init__(self, training_data_path, epochs, enable_gpu=False):
+    def __init__(self, training_data_path='', epochs=0, enable_gpu=False, train=True):
         self.enable_gpu = enable_gpu
         #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.inputs = [
@@ -85,17 +85,21 @@ class SFModel():
                 Param(),    # T
                 ]
         self.outputs = [Param() for i in range(7)]  # coeffs
-        #
-        self.read_data(training_data_path)
+        
+        if train:
+            self.read_data(training_data_path)
+
         self.scaled_data = False
         self.trained = False
+
         # data structured for storing Tensors
         self.X = []
         self.y = []
+
         # neural network details
         # 1. instantiate the model
         self.model = Net()
-        if (self.enable_gpu):
+        if self.enable_gpu:
             self.model.cuda()
         # 2. define the loss function
         self.critereon = MSELoss()
@@ -106,6 +110,39 @@ class SFModel():
         # historic error norm data
         self.iteration = []
         self.error_norm = []
+        self.weights_loaded = False
+
+    def save_model(self,filename):
+        torch.save(self.model.state_dict(), filename)
+
+    def load_model(self,filename):
+        self.model.load_state_dict(torch.load(filename))
+        self.model.eval()
+        self.weights_loaded = True
+
+    def save_mmm(self,filename):
+        data = np.zeros((len(self.inputs)+len(self.outputs),3))
+        for i in range(len(self.inputs)):
+            data[i,0] = self.inputs[i].scale.max
+            data[i,1] = self.inputs[i].scale.min
+            data[i,2] = self.inputs[i].scale.mean
+        for i in range(len(self.outputs)):
+            data[len(self.inputs)+i,0] = self.outputs[i].scale.max
+            data[len(self.inputs)+i,1] = self.outputs[i].scale.min
+            data[len(self.inputs)+i,2] = self.outputs[i].scale.mean
+        np.savetxt(filename,data)
+
+    def load_mmm(self,filename):
+        data = np.loadtxt(filename,comments=['#'])
+        for i in range(len(self.inputs)):
+            self.inputs[i].scale.max  = data[i,0]
+            self.inputs[i].scale.min  = data[i,1]
+            self.inputs[i].scale.mean = data[i,2]
+        for i in range(len(self.outputs)):
+            self.outputs[i].scale.max  = data[len(self.inputs)+i,0]
+            self.outputs[i].scale.min  = data[len(self.inputs)+i,1]
+            self.outputs[i].scale.mean = data[len(self.inputs)+i,2]
+        self.scaled_data = True
 
     def read_data(self, filenames):
         # params -> [[R2,K1,K2,M,T],...]
@@ -129,7 +166,7 @@ class SFModel():
         self.X = Variable(Tensor(self.X))
         self.y = np.array([var.data for var in self.outputs]).T
         self.y = Variable(Tensor(self.y))
-        if (self.enable_gpu):
+        if self.enable_gpu:
             self.X = self.X.cuda()
             self.y = self.y.cuda()
 
@@ -150,19 +187,19 @@ class SFModel():
         self.trained = True
 
     def prediction(self, inputs):
-        if (self.trained == False):
+        if not self.trained and not self.weights_loaded:
             print("ERROR: a prediction was attempted before model has been trained.")
             exit()
         self.model.eval()
         scaled_inputs = [self.inputs[i].scale.normalize(inputs[i]) for i in range(len(inputs))]
-        if (self.enable_gpu):
+        if self.enable_gpu:
             self.model.cpu()
         output_preds = self.model(Variable(Tensor(scaled_inputs)))
         scaled_output_preds = [self.outputs[i].scale.denormalize(float(output_preds.data[i])) for i in range(len(self.outputs))]
         return scaled_output_preds
 
     def plot_error(self):
-        if (self.trained == False):
+        if not self.trained:
             print("ERROR: error norm plot cannot be generated before the model has been trained.")
             exit()
         plt.plot(self.iteration,self.error_norm)
@@ -172,75 +209,26 @@ class SFModel():
         plt.ylabel("Error norm")
         plt.show()
 
-    # def visualise_model(self, mach_max, mach_min, theta_max, theta_min, npts):
-        # (mach_numbers, theta_angles) = np.meshgrid(np.linspace(mach_min, mach_max, num=npts),
-                                                   # np.linspace(theta_min, theta_max, num=npts))
-        # # analytical beta
-        # beta_analytic = np.zeros((npts,npts))
-        # # model prediction beta
-        # beta_model = np.zeros((npts,npts))
-        # for i in range(npts):
-            # for j in range(npts):
-                # beta = analytic.shock_angle_from_ThetaBetaM(mach_numbers[i][j],
-                                                        # theta_angles[i][j],
-                                                        # gamma)
-                # beta_analytic[i][j] = beta
-                # beta = self.prediction(theta_angles[i][j],
-                                       # mach_numbers[i][j])
-                # beta_model[i][j] = beta
-
-        # # 3d model comparison plot
-        # fig = plt.figure(num=1, clear=True)
-        # ax = fig.add_subplot(1, 1, 1, projection='3d')
-        # ax.plot_surface(theta_angles, mach_numbers, beta_analytic, cmap=cm.magma,label='analytic')
-        # ax.plot_surface(theta_angles, mach_numbers, beta_model, cmap=cm.viridis,label='NN model')
-        # #ax.legend()
-        # ax.set(xlabel=r'$\theta$', ylabel='M', zlabel=r'$\beta$', title=r'$\theta-\beta-M$')
-        # fig.tight_layout()
-        # plt.show()
-
-        # # model comparison plot - 2d slice
-        # plt.plot(mach_numbers[50], beta_analytic[50], label='analytic')
-        # plt.plot(mach_numbers[50], beta_model[50], label='NN model')
-        # plt.grid(True, color='black', linestyle='--', linewidth=0.5)
-        # plt.legend()
-        # title = "Mach vs " + r'$\beta$' + " for " + r'$\theta$' + " = " + str(theta_angles[50][0])
-        # plt.title(title)
-        # plt.xlabel("Mach")
-        # plt.ylabel(r'$\beta$')
-        # plt.show()
-
-        # # 3d model error plot
-        # beta_error = abs(beta_analytic-beta_model)/beta_analytic * 100
-        # fig = plt.figure(num=1, clear=True)
-        # ax = fig.add_subplot(1, 1, 1, projection='3d')
-        # ax.plot_surface(theta_angles, mach_numbers, beta_error, cmap=cm.viridis)
-        # ax.set(xlabel=r'$\theta$', ylabel='M', zlabel=r'$\beta$ error',
-               # title=r'$\theta-\beta-M$')
-        # fig.tight_layout()
-        # plt.show()
 
 
-# ====================================
-# MAIN PROGRAM
-# ====================================
 
 if __name__ == "__main__":
 
-    #{GPU=1} python3 nn-sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
+    #{GPU=1} python3 nn_sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
+
+    # set env variable to run on GPU
+    enable_gpu = os.getenv('GPU') != None
 
     # grab training data filename
-    if (len(sys.argv) < 2):
+    if len(sys.argv) < 2:
         print("NOTE: no training data file provided.")
         exit()
+
     filenames = sys.argv[1].strip().split(',')
     for filename in filenames:
         if (os.path.isfile(filename) == False):
             print("ERROR: invalid training data file provided.")
             exit()
-
-    # set env variable to run on GPU
-    enable_gpu = os.getenv('GPU') != None
 
     # load the training data
     sf_model = SFModel(filenames, 100000, enable_gpu)
@@ -256,6 +244,18 @@ if __name__ == "__main__":
 
     # generate error convergence plot
     sf_model.plot_error()
+
+    # save the model
+    res = os.popen(f'ls ./models/').read().strip().split('\n')
+    mids = []
+    for name in res:
+        if 'model' in name:
+            mids.append(int(name[5:7]))
+    mid = 0
+    while mid in mids:
+        mid += 1
+    sf_model.save_model(f'./models/model{mid:02d}.pth')
+    sf_model.save_mmm(f'./models/mmm{mid:02d}.dat')
 
     # test the model
     # input params: R2,K1,K2,M,T
@@ -342,25 +342,22 @@ if __name__ == "__main__":
     l2_error = (np.sum((ps - es)**2) / ps.shape[0])**0.5
     print("L2 error: {}".format(l2_error))
 
-    # visualise the model
-    # sf_model.visualise_model(1.5, 5.0, 5.0, 45.0, 100)
+    plt.figure(2,figsize=(8,8))
+    plt.title('polar domain')
+    plt.xlim(0,np.pi/2)
+    plt.xlabel('theta')
+    plt.ylabel('radius')
+    plt.xticks([i*np.pi/8 for i in range(5)],
+    ['0',r'$\frac{\pi}{8}$',r'$\frac{1\pi}{4}$',r'$\frac{3\pi}{8}$',r'$\frac{\pi}{2}$'])
+    plt.legend(loc='best')
 
-plt.figure(2)
-plt.title('polar domain')
-plt.xlim(0,np.pi/2)
-plt.xlabel('theta')
-plt.ylabel('radius')
-plt.xticks([i*np.pi/8 for i in range(5)],
-['0',r'$\frac{\pi}{8}$',r'$\frac{1\pi}{4}$',r'$\frac{3\pi}{8}$',r'$\frac{\pi}{2}$'])
-plt.legend(loc='best')
+    plt.figure(3,figsize=(8,8))
+    plt.title('cartesian domain')
+    plt.axis('equal')
+    plt.legend(loc='best')
+    plt.xlabel('x')
+    plt.ylabel('y')
 
-plt.figure(3)
-plt.title('cartesian domain')
-plt.axis('equal')
-plt.legend(loc='best')
-plt.xlabel('x')
-plt.ylabel('y')
-
-plt.show(block=False)
-# plt.show()
-plt.show()
+    plt.show(block=False)
+    # plt.show()
+    plt.show()
