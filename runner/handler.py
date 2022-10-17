@@ -14,7 +14,7 @@ Mmax = 8.0
 
 # R1, R2, K1, K2 randomnly set
 
-var = '_17'
+var = '_19'
 # var = ''
 
 tmp = 'tmp' + var
@@ -56,7 +56,12 @@ for i in range(nsims):
     #
     # T  = rng.random() * (Tmax - Tmin) + Tmin
     #
-    R1 = rng.random() * 0.4 + 0.8
+    # R1 = rng.random() * 0.4 + 0.8
+    # R2 = rng.random() * 0.6 + 0.6
+    # K1 = rng.random() * 0.3
+    # K2 = rng.random() * 0.3
+    #
+    R1 = rng.random() * 0.8 + 0.8
     R2 = rng.random() * 0.6 + 0.6
     K1 = rng.random() * 0.3
     K2 = rng.random() * 0.3

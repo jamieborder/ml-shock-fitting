@@ -7,9 +7,9 @@ sys.path.append('..')
 from bezier import *
 
 if len(sys.argv) < 2:
-    print('python3 vis.py [i [path]]')
-    print('python3 vis.py [i,j,... [path]]')
-    print('python3 vis.py [i:k [path]]')
+    print('python3 vis_sf.py [i [path]]')
+    print('python3 vis_sf.py [i,j,... [path]]')
+    print('python3 vis_sf.py [i:k [path]]')
 
 ts = np.linspace(0,1,100)
 R1 = 1
@@ -118,9 +118,9 @@ plt.axis('square')
 plt.xlim(-2.5,0.2)
 # plt.ylim(-0.2,6.0)
 plt.tight_layout()
-plt.savefig('tmp.svg')
+# plt.savefig('tmp.svg')
 
-plt.xlim(-1.2,0.05)
-plt.ylim(-0.05,1.2)
-plt.savefig('tmpz.svg')
+# plt.xlim(-1.2,0.05)
+# plt.ylim(-0.05,1.2)
+# plt.savefig('tmpz.svg')
 plt.show()
