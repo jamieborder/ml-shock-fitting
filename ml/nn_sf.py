@@ -23,8 +23,11 @@ from torch.nn import Linear, MSELoss, functional as F
 from torch.optim import SGD, Adam, RMSprop
 from torch.autograd import Variable
 
+import re
+
 sys.path.append('..')
 from bezier import genBezierPoints
+from nn_diagram_template import *
 
 plt.rcParams['font.size'] = 16
 
@@ -73,6 +76,77 @@ class Net(torch.nn.Module):
         x = self.fc4(x)
         return x
 
+    def gen_diagram(self,filename):
+        nn_str = self.__repr__().split('\n')
+        sizes = []
+        prev_size = -1
+        for line in nn_str:
+            if 'Linear' in line:
+                m = re.search('in_features=([0-9]+)',line)
+                if m is None:
+                    print("failed to match `in_features' in <", line, ">")
+                    return
+                in_size = int(m.groups()[0])
+                if prev_size > 0 and prev_size != in_size:
+                    print(f"size mismatch: prev_size = {prev_size}, in_size = {in_size}")
+                    return
+                sizes.append(in_size)
+                m = re.search('out_features=([0-9]+)',line)
+                if m is None:
+                    print("failed to match `out_features' in <", line, ">")
+                    return
+                prev_size = int(m.groups()[0])
+        sizes.append(prev_size)
+        #
+        #
+        first_nodes = ['x_'+str(i) for i in range(sizes[0])]
+        first_nodes_str = ''
+        for node in first_nodes:
+            first_nodes_str += node + ' '
+        first_nodes_str = first_nodes_str[:-1]
+        sub_nodes = [['a_'+str(i)+'_'+str(j) for i in range(sizes[j])] for j in range(1,len(sizes))]
+        sub_nodes_strs = []
+        for sg in sub_nodes:
+            sub_node_str = ''
+            for node in sg:
+                sub_node_str += node + ' '
+            sub_nodes_strs.append(sub_node_str[:-1])
+        #
+        #
+        subgs = ''
+        for i in range(len(sizes)-1):
+            subgs += template_sg.format(
+                ID=i+1,
+                COLOUR='red2' if i != len(sizes)-2 else 'seagreen2',
+                NODES=sub_nodes_strs[i],
+                LABEL='layer '+str(i+1) if i != len(sizes)-2 else 'outputs'
+                )
+        #
+        cons = ''
+        # print(first_nodes)
+        # print(sub_nodes)
+        all_nodes = sub_nodes.copy()
+        all_nodes.insert(0,first_nodes)
+        # print(all_nodes)
+        for i in range(len(sizes)-1):
+            for j in range(sizes[i]):
+                for k in range(sizes[i+1]):
+                    cons += all_nodes[i][j] + ' -> ' + all_nodes[i+1][k] + '[arrowsize=0.5];\n'
+            cons += '\n'
+        #
+        # print(cons)
+        ds = template_nn.format(
+                FIRST_NODES=first_nodes_str,
+                SUBGRAPHS=subgs,
+                CONNECTIONS=cons
+                )
+        #
+        with open(filename,'w') as f:
+            f.write(ds)
+            f.close()
+        os.popen(f'dot -Tpng -O {filename}')
+        print(f'generated graph in {filename}.png')
+
 class SFModel():
     def __init__(self, training_data_path='', epochs=0, enable_gpu=False, train=True):
         self.enable_gpu = enable_gpu
@@ -85,7 +159,7 @@ class SFModel():
                 Param(),    # T
                 ]
         self.outputs = [Param() for i in range(7)]  # coeffs
-        
+
         if train:
             self.read_data(training_data_path)
 
@@ -209,35 +283,44 @@ class SFModel():
         plt.ylabel("Error norm")
         plt.show()
 
-
-
-
 if __name__ == "__main__":
 
-    #{GPU=1} python3 nn_sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
+    #{GPU=1} {VIS=1} python3 nn_sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
 
     # set env variable to run on GPU
     enable_gpu = os.getenv('GPU') != None
 
+    # check if just wanting to vis
+    vis_only = os.getenv('VIS') != None
+
     # grab training data filename
     if len(sys.argv) < 2:
-        print("NOTE: no training data file provided.")
-        exit()
-
-    filenames = sys.argv[1].strip().split(',')
-    for filename in filenames:
-        if (os.path.isfile(filename) == False):
-            print("ERROR: invalid training data file provided.")
+        if not vis_only:
+            print("NOTE: no training data file provided.")
             exit()
+        else:
+            filenames = ['','']
+    else:
+        filenames = sys.argv[1].strip().split(',')
+        for filename in filenames:
+            if (os.path.isfile(filename) == False):
+                print("ERROR: invalid training data file provided.")
+                exit()
 
-    # load the training data
-    sf_model = SFModel(filenames, 100000, enable_gpu)
+    # create the model and load the training data if training
+    train = not vis_only
+    sf_model = SFModel(filenames, 100000, enable_gpu, train=train)
+
+    if vis_only:
+        sf_model.model.gen_diagram('nn_diagram')
+        exit()
 
     # scale the training data
     sf_model.scale_data()
 
     # restructure data for network training
     sf_model.convert_data_to_tensor()
+
 
     # training model
     sf_model.train_model()
