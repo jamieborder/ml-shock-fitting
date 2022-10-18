@@ -6,15 +6,14 @@ import matplotlib.cm as cm
 sys.path.append('..')
 from bezier import *
 
-print('vis_sf.py expects params R2,K1,K2,M,T')
+print('vis_sf2.py expects params R1,R2,K1,K2,M')
 
 if len(sys.argv) < 2:
-    print('python3 vis_sf.py [i [path]]')
-    print('python3 vis_sf.py [i,j,... [path]]')
-    print('python3 vis_sf.py [i:k [path]]')
+    print('python3 vis_sf2.py [i [path]]')
+    print('python3 vis_sf2.py [i,j,... [path]]')
+    print('python3 vis_sf2.py [i:k [path]]')
 
 ts = np.linspace(0,1,100)
-R1 = 1
 
 
 # plotting all data files
@@ -53,11 +52,11 @@ for path in paths:
         resf = path + f'res{idx:06d}.dat'
 
         f = open(datf,'r')
+        R1 = float(f.readline().strip().replace(' ','').split('=')[-1])
         R2 = float(f.readline().strip().replace(' ','').split('=')[-1])
         K1 = float(f.readline().strip().replace(' ','').split('=')[-1])
         K2 = float(f.readline().strip().replace(' ','').split('=')[-1])
         M  = float(f.readline().strip().replace(' ','').split('=')[-1])
-        T  = float(f.readline().strip().replace(' ','').split('=')[-1])
         dat = np.loadtxt(f)
 
         res = np.loadtxt(resf,skiprows=1)
