@@ -24,12 +24,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7814369"
-     inkscape:cx="182.99834"
+     inkscape:cx="-8.4201691"
      inkscape:cy="171.49078"
      inkscape:window-width="1534"
      inkscape:window-height="920"
      inkscape:window-x="2029"
-     inkscape:window-y="191"
+     inkscape:window-y="128"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1" />
   <defs
@@ -77,13 +77,13 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="7.6322689"
-       y="36.957359"
+       y="43.500126"
        id="text4504"><tspan
          sodipodi:role="line"
          id="tspan4502"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="7.6322689"
-         y="36.957359">$R_2$</tspan></text>
+         y="43.500126">$R_2$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:3.52778px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -121,46 +121,46 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="7.5645957"
-       y="43.26413"
+       y="49.806896"
        id="text4504-3"><tspan
          sodipodi:role="line"
          id="tspan4502-5"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="7.5645957"
-         y="43.26413">$K_1$</tspan></text>
+         y="49.806896">$K_1$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="7.4479141"
-       y="49.212399"
+       y="55.755165"
        id="text4504-3-6"><tspan
          sodipodi:role="line"
          id="tspan4502-5-2"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="7.4479141"
-         y="49.212399">$K_2$</tspan></text>
+         y="55.755165">$K_2$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="7.4826627"
-       y="55.968227"
+       y="62.510994"
        id="text4504-3-6-9"><tspan
          sodipodi:role="line"
          id="tspan4502-5-2-1"
          style="font-size:4.23333px;stroke-width:0.264583"
          x="7.4826627"
-         y="55.968227">$M$</tspan></text>
+         y="62.510994">$M$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="7.688168"
-       y="62.225677"
+       x="7.6417551"
+       y="37.486843"
        id="text4504-3-6-9-2"><tspan
          sodipodi:role="line"
          id="tspan4502-5-2-1-7"
          style="font-size:4.23333px;stroke-width:0.264583"
-         x="7.688168"
-         y="62.225677">$T$</tspan></text>
+         x="7.6417551"
+         y="37.486843">$R_1$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
