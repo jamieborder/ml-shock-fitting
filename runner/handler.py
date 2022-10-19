@@ -14,7 +14,7 @@ Mmax = 8.0
 
 # R1, R2, K1, K2 randomnly set
 
-var = '_20'
+var = '_27'
 # var = ''
 
 tmp = 'tmp' + var
@@ -42,6 +42,7 @@ for i in range(nsims):
     #
     # generate random params for Bezier curve representing geometry
     #
+    # 1,2,3,4,5,6,7
     # R2 = rng.random() * 0.2 + 0.9
     # K1 = rng.random()
     # K2 = rng.random() * 0.8
@@ -61,14 +62,22 @@ for i in range(nsims):
     # K1 = rng.random() * 0.3
     # K2 = rng.random() * 0.3
     #
+    # 18,19 ?
     # R1 = rng.random() * 0.8 + 0.8
     # R2 = rng.random() * 0.6 + 0.6
     # K1 = rng.random() * 0.3
     # K2 = rng.random() * 0.3
     #
-    R1 = rng.random() * 0.8 + 0.8
-    R2 = rng.random() * 0.6 + 0.6
-    K1 = rng.random() * 0.3 + 0.2
+    # 20 ?
+    # R1 = rng.random() * 0.8 + 0.8
+    # R2 = rng.random() * 0.6 + 0.6
+    # K1 = rng.random() * 0.3 + 0.2
+    # K2 = rng.random()
+    #
+    # 21,22,23,24,25,26
+    R1 = rng.random() * 2.0 + 0.8
+    R2 = rng.random() * 1.0 + 0.6
+    K1 = rng.random() * 0.5 + 0.4
     K2 = rng.random()
     #
     M  = rng.random() * (Mmax - Mmin) + Mmin
