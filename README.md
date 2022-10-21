@@ -8,6 +8,9 @@ Idea: randomised inflow + random-ish distorted cylinder + Eilmer shock-fitting
 - [Eilmer](https://github.com/gdtk-uq/gdtk)  
 - [PyTorch](https://pytorch.org/)  
 
+## References
+- FNN code is from Kyle Damm's [shock_angle-ml](https://github.com/kyleadm/shock_angle-ml), modified to suit
+
 ## Randomised parameter bounds
 Mach number -> [2.0, 8.0]  
 temperature -> [300.0, 800.0] K
