@@ -2,10 +2,10 @@
 # nn_sf.py
 #  from template: nn-ThetaBetaM.py
 #
-# input: theta-beta-M training data
+# input : bow shock location from shock-fitting CFD simulations
 # output: trained neural network
-#         that approximates beta
-#         given theta and M
+#         that approximates location of bow shock
+#         given M and body geometry
 #
 # author Kyle Damm (May 2021)
 # modified Jamie Border (Oct 2022)
@@ -64,16 +64,26 @@ class Param():
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.fc1 = Linear(5, 20)
-        self.fc2 = Linear(20, 20)
-        self.fc3 = Linear(20, 20)
-        self.fc4 = Linear(20, 7)
+        #self.fc1 = Linear(5, 20)
+        #self.fc2 = Linear(20, 20)
+        #self.fc3 = Linear(20, 20)
+        #self.fc4 = Linear(20, 7)
+        #self.fc1 = Linear(5, 10)
+        #self.fc2 = Linear(10, 10)
+        #self.fc3 = Linear(10, 10)
+        #self.fc4 = Linear(10, 7)
+        self.fc1 = Linear(5, 10)
+        self.fc2 = Linear(10, 10)
+        self.fc3 = Linear(10, 7)
 
     def forward(self, x):
+        #x = F.relu(self.fc1(x))
+        #x = F.relu(self.fc2(x))
+        #x = F.relu(self.fc3(x))
+        #x = self.fc4(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = self.fc3(x)
         return x
 
     def gen_diagram(self,filename):
@@ -123,18 +133,15 @@ class Net(torch.nn.Module):
                 )
         #
         cons = ''
-        # print(first_nodes)
-        # print(sub_nodes)
         all_nodes = sub_nodes.copy()
         all_nodes.insert(0,first_nodes)
-        # print(all_nodes)
+        #
         for i in range(len(sizes)-1):
             for j in range(sizes[i]):
                 for k in range(sizes[i+1]):
                     cons += all_nodes[i][j] + ' -> ' + all_nodes[i+1][k] + '[arrowsize=0.5];\n'
             cons += '\n'
         #
-        # print(cons)
         ds = template_nn.format(
                 FIRST_NODES=first_nodes_str,
                 SUBGRAPHS=subgs,
@@ -148,20 +155,20 @@ class Net(torch.nn.Module):
         print(f'generated graph in {filename}.png')
 
 class SFModel():
-    def __init__(self, training_data_path='', epochs=0, enable_gpu=False, train=True):
+    def __init__(self, training_data_filenames=None, epochs=0, enable_gpu=False, train=True):
         self.enable_gpu = enable_gpu
         #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.inputs = [
+                Param(),    # R1
                 Param(),    # R2
                 Param(),    # K1
                 Param(),    # K2
                 Param(),    # M
-                Param(),    # T
                 ]
         self.outputs = [Param() for i in range(7)]  # coeffs
 
         if train:
-            self.read_data(training_data_path)
+            self.read_data(training_data_filenames)
 
         self.scaled_data = False
         self.trained = False
@@ -178,7 +185,7 @@ class SFModel():
         # 2. define the loss function
         self.critereon = MSELoss()
         # 3. define the optimizer
-        self.optimizer = SGD(self.model.parameters(), lr=0.2)
+        self.optimizer = SGD(self.model.parameters(), lr=0.1)
         # 4. define the number of epochs
         self.nb_epochs = epochs
         # historic error norm data
@@ -218,16 +225,43 @@ class SFModel():
             self.outputs[i].scale.mean = data[len(self.inputs)+i,2]
         self.scaled_data = True
 
-    def read_data(self, filenames):
-        # params -> [[R2,K1,K2,M,T],...]
-        params = np.loadtxt(filenames[0])
-        for i in range(len(self.inputs)):
-            self.inputs[i].data = params[:,i]
+    def read_data(self, training_data_filenames):
+        if training_data_filenames is None:
+            print('ERROR: no valid training data filenames provided:', training_data_filenames)
+            exit()
+        param_fns,coeff_fns = training_data_filenames[0],training_data_filenames[1]
 
-        # coeffs -> [[a0, a1, ..., a6],...] for a_n * x**n
-        coeffs = np.loadtxt(filenames[1])
-        for i in range(len(self.outputs)):
-            self.outputs[i].data = coeffs[:,i]
+        if len(param_fns) == 1:
+            # params -> [[R1,R2,K1,K2,M],...]
+            params = np.loadtxt(param_fns[0])
+            print(params.shape)
+            for i in range(len(self.inputs)):
+                self.inputs[i].data = params[:,i]
+
+            # coeffs -> [[a0, a1, ..., a6],...] for a_n * x**n
+            coeffs = np.loadtxt(coeff_fns[0])
+            print(coeffs.shape)
+            for i in range(len(self.outputs)):
+                self.outputs[i].data = coeffs[:,i]
+        else:
+            print('WARNING: known issues here...')
+
+            # need to know number of columns in params,coeffs already, to pre-allocate these arrays
+            for i in range(len(self.inputs)):
+                self.inputs[i].data = np.empty((0,5))
+            for i in range(len(self.outputs)):
+                self.outputs[i] = np.empty((0,7))
+
+            for j in range(len(param_fns)):
+                # params -> [[R2,K1,K2,M,T],...]
+                params = np.loadtxt(param_fns[j])
+                for i in range(len(self.inputs)):
+                    self.inputs[i].data = np.vstack((self.inputs[i].data, params[:,i]))
+
+                # coeffs -> [[a0, a1, ..., a6],...] for a_n * x**n
+                coeffs = np.loadtxt(coeff_fns[j])
+                for i in range(len(self.outputs)):
+                    self.outputs[i].data = np.vstack((self.outputs[i].data, coeffs[:,i]))
 
     def scale_data(self):
         for var in self.inputs:
@@ -283,9 +317,10 @@ class SFModel():
         plt.ylabel("Error norm")
         plt.show()
 
+
 if __name__ == "__main__":
 
-    #{GPU=1} {VIS=1} python3 nn_sf.py ../runs/data/params.dat,../runs/data/coeffs.dat
+    #{GPU=1} {VIS=1} python3 nn_sf.py ../runs/data/params.dat, ../runs/data/coeffs.dat,
 
     # set env variable to run on GPU
     enable_gpu = os.getenv('GPU') != None
@@ -294,22 +329,31 @@ if __name__ == "__main__":
     vis_only = os.getenv('VIS') != None
 
     # grab training data filename
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         if not vis_only:
-            print("NOTE: no training data file provided.")
+            print("NOTE: no training data files provided.")
             exit()
         else:
             filenames = ['','']
     else:
-        filenames = sys.argv[1].strip().split(',')
-        for filename in filenames:
+        params = sys.argv[1].strip().split(',')
+        coeffs = sys.argv[2].strip().split(',')
+        for filename in params:
             if (os.path.isfile(filename) == False):
-                print("ERROR: invalid training data file provided.")
+                print("ERROR: invalid 'params.dat' training data file provided:", filename)
                 exit()
+        for filename in coeffs:
+            if (os.path.isfile(filename) == False):
+                print("ERROR: invalid 'coeffs.dat' training data file provided:", filename)
+                exit()
+        if len(params) != len(coeffs):
+            print("ERROR: number of params and coeffs files supplied are different:",
+                    len(params), '!=', len(coeffs))
+            exit()
 
     # create the model and load the training data if training
     train = not vis_only
-    sf_model = SFModel(filenames, 100000, enable_gpu, train=train)
+    sf_model = SFModel([params,coeffs], 100000, enable_gpu, train=train)
 
     if vis_only:
         sf_model.model.gen_diagram('nn_diagram')
@@ -339,6 +383,8 @@ if __name__ == "__main__":
         mid += 1
     sf_model.save_model(f'./models/model{mid:02d}.pth')
     sf_model.save_mmm(f'./models/mmm{mid:02d}.dat')
+
+    # exit()
 
     # test the model
     # input params: R2,K1,K2,M,T
@@ -391,7 +437,7 @@ if __name__ == "__main__":
     # it is a bit awkard but we can create a Bezier curve of the surface
     #  from the input params in cartesian space, and then map them to polar
 
-    
+
     p = np.zeros((4,2))
     # input params: R2,K1,K2,M,T
     R1 = 1.0
@@ -402,7 +448,7 @@ if __name__ == "__main__":
     p[3,:] = [ 0, R2]
     ts = np.linspace(0,1,thetas.shape[0])
     xy = genBezierPoints(p,ts.shape[0])
-    
+
     # plot in cartesian space
     plt.figure(3)
     plt.plot(xy[:,0],xy[:,1],'k.-',label='surface')

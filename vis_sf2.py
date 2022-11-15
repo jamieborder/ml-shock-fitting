@@ -116,7 +116,8 @@ if False:
 plt.axis('square')
 # plt.show(block=False)
 
-plt.xlim(-2.5,0.2)
+#plt.xlim(-2.5,0.2)
+plt.xlim(-6.5,0.2)
 # plt.ylim(-0.2,6.0)
 plt.tight_layout()
 # plt.savefig('tmp.svg')

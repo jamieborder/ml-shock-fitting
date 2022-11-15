@@ -25,7 +25,8 @@ res = os.popen(f'mkdir -p {tmp}').read()
 res = os.popen(f'mkdir -p {data}').read()
 res = os.popen(f'cp template/* {tmp}/').read()
 
-rng = np.random.default_rng(13)
+# BAD idea Jamie
+# rng = np.random.default_rng(13)
 
 stat = open(f'{prog}','a',buffering=1)
 
@@ -88,6 +89,7 @@ for i in range(nsims):
         f.write(f'K1 = {K1}\n')
         f.write(f'K2 = {K2}\n')
         f.write(f'M  = {M}\n')
+        #f.write(f'T  = {T}\n')
         f.close()
     #
     res = os.popen(f'cd {tmp} && bash run.sh').read()
@@ -118,4 +120,4 @@ for i in range(nsims):
     #
     # record time taken
     now = datetime.datetime.now().time()
-    stat.write(f'     @ {now} finised\n')
+    stat.write(f'     @ {now} finished\n')

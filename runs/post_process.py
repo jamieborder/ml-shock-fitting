@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-ld = 'data/'
+ld = 'data_all/'
 
 # plot_them = True
 plot_them = False
