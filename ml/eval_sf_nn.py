@@ -28,13 +28,13 @@ if __name__ == "__main__":
         exit()
 
     input_file = sys.argv[2].strip()
-    
+
     sf_model = SFModel(enable_gpu=enable_gpu,train=False)
 
     if enable_gpu:
         sf_model.cuda()
 
-    sf_model.load_model(model_file)
+    sf_model.load_model(model_file,on_gpu=enable_gpu)
     sf_model.load_mmm(mmm_file)
 
     # greedy read first two non comment lines

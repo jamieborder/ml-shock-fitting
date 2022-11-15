@@ -19,6 +19,10 @@ rc(
 
 params = np.loadtxt('../runs/data/params.dat')
 coeffs = np.loadtxt('../runs/data/coeffs.dat')
+#params = np.loadtxt('../runs/data-repeated/params.dat')
+#coeffs = np.loadtxt('../runs/data-repeated/coeffs.dat')
+
+print(np.unique(params,axis=0).shape[0], ' / ', params.shape[0], ' are unique')
 
 bcm = cm.turbo(np.linspace(0.1,0.40,len(params)))
 rcm = cm.turbo(np.linspace(0.60,0.9,len(params)))
@@ -48,17 +52,19 @@ if False:
         xlabel('random iteration number, -')
         ylabel('labels[i]')
         tight_layout()
-        savefig(f'rand_{labels[i]}.png',dpi=300)
-        clf()
-        close()
+        #savefig(f'rand_{labels[i]}.png',dpi=300)
+        #clf()
+        #close()
+        show()
 
 
-if False:
+if True:
     ts = np.linspace(0,1,100)
 
     figure(1,figsize=fs)
     for i in range(len(params)):
         R1,R2,K1,K2,M = params[i,:]
+        #R2,K1,K2,M,T = params[i,:]; R1 = 1.0
         p = np.zeros((m+1,2))
         #
         p[0,:] = [-R1, 0]

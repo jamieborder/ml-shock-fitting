@@ -64,26 +64,24 @@ class Param():
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        #self.fc1 = Linear(5, 20)
-        #self.fc2 = Linear(20, 20)
-        #self.fc3 = Linear(20, 20)
-        #self.fc4 = Linear(20, 7)
+        self.fc1 = Linear(5, 20)
+        self.fc2 = Linear(20, 20)
+        self.fc3 = Linear(20, 20)
+        self.fc4 = Linear(20, 7)
         #self.fc1 = Linear(5, 10)
         #self.fc2 = Linear(10, 10)
         #self.fc3 = Linear(10, 10)
         #self.fc4 = Linear(10, 7)
-        self.fc1 = Linear(5, 10)
-        self.fc2 = Linear(10, 10)
-        self.fc3 = Linear(10, 7)
+        #self.fc1 = Linear(5, 10)
+        #self.fc2 = Linear(10, 7)
 
     def forward(self, x):
-        #x = F.relu(self.fc1(x))
-        #x = F.relu(self.fc2(x))
-        #x = F.relu(self.fc3(x))
-        #x = self.fc4(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+        #x = F.relu(self.fc1(x))
+        #x = self.fc2(x)
         return x
 
     def gen_diagram(self,filename):
@@ -196,8 +194,11 @@ class SFModel():
     def save_model(self,filename):
         torch.save(self.model.state_dict(), filename)
 
-    def load_model(self,filename):
-        self.model.load_state_dict(torch.load(filename))
+    def load_model(self,filename,on_gpu=False):
+        if on_gpu:
+            self.model.load_state_dict(torch.load(filename))
+        else:
+            self.model.load_state_dict(torch.load(filename,map_location=torch.device('cpu')))
         self.model.eval()
         self.weights_loaded = True
 
