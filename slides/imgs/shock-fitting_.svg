@@ -26,13 +26,13 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="-151.32085"
-     inkscape:cy="412.24325"
+     inkscape:zoom="0.66389758"
+     inkscape:cx="651.4559"
+     inkscape:cy="223.67908"
      inkscape:window-width="1528"
      inkscape:window-height="920"
-     inkscape:window-x="2004"
-     inkscape:window-y="166"
+     inkscape:window-x="392"
+     inkscape:window-y="567"
      inkscape:window-maximized="0"
      inkscape:current-layer="g9772"
      width="110mm" />
@@ -282,9 +282,7 @@
            x="92.091843"
            y="64.928688"><tspan
    style="fill:#d11116;fill-opacity:1"
-   id="tspan37237">M</tspan>,<tspan
-   style="fill:#d11116;fill-opacity:1"
-   id="tspan38053">T</tspan>,p</tspan></text>
+   id="tspan37237">M</tspan>,T,p</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:8.43421px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.23908;stroke-miterlimit:2;stroke-dasharray:none"
@@ -342,10 +340,10 @@
          transform="scale(0.83654014,1.1953999)"><tspan
            x="145.80188"
            y="101.95365"
-           id="tspan49804">shock </tspan><tspan
+           id="tspan2551">shock </tspan><tspan
            x="145.80188"
            y="108.27931"
-           id="tspan49806">location</tspan></text>
+           id="tspan2553">location</tspan></text>
       <g
          id="g23866"
          transform="translate(24.171137,9.0255752)">
