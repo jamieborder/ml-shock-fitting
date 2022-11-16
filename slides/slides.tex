@@ -58,6 +58,9 @@
   \endgroup
 }
 
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+
 \begin{document}
 
 \setbeamertemplate{caption}{\raggedright\insertcaption\par}
@@ -176,6 +179,54 @@
         \end{figure}
     \end{frame}
 
+    \begin{frame}{\mybox{green}{blue}{`Random' parameters}}
+        \vspace{-0.5cm}
+        \begin{figure}[h!]
+            \centering
+            \begin{subfigure}[t]{0.5\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth]{../runs/not_rand_R2.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.5\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth]{../runs/not_rand_K1.png}
+            \end{subfigure}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}{\mybox{green}{blue}{Poor randomly generated bodies and shock-fit bow shocks}}
+        \vspace{-0.5cm}
+        \begin{columns}
+            \begin{column}{0.5\textwidth}
+                % \vspace{-2.0cm}
+                \begin{figure}
+                    % \includesvg[width=0.4\textwidth]{./imgs/rand_shocks.svg}
+                    \includegraphics[width=0.8\textwidth]{./imgs/bad_surface.pdf}
+                    % \caption{centroidal dual}
+                \end{figure}
+            \end{column}
+            % \hspace{-0.5cm}
+            \begin{column}{0.5\textwidth}  %%<--- here
+                \vspace{0.5cm}
+                \begin{figure}
+                    % \includesvg[width=0.4\textwidth]{./imgs/rand_shocks_zoom.svg}
+                    \includegraphics[width=1.0\textwidth,trim=0 0 0 100,clip]{./imgs/bad_surface_zoom.pdf}
+                    % \caption{median dual}
+                \end{figure}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+    \begin{frame}{\mybox{green}{blue}{Convergence}}
+        % \vspace{-0.5cm}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{../ml/conv.png}
+        \end{figure}
+    \end{frame}
+
     \begin{frame}{\mybox{green}{blue}{Example fit in polar coordinates}}
         \vspace{-0.1cm}
         \begin{figure}
@@ -188,6 +239,111 @@
         \begin{figure}
             \includegraphics[width=0.8\textwidth,trim=0 0 0 65,clip]{../ml/examples/ex2/pred_cartesian.png}
         \end{figure}
+    \end{frame}
+
+    \begin{frame}{\mybox{green}{blue}{Test Results}}
+        %    100 data points; 10 of those used for testing
+        %    3.4% error in polar coord
+        \begin{figure}[h!]
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_00.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_01.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_02.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_03.png}
+            \end{subfigure}%
+            \hfill
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_04.png}
+            \end{subfigure}
+            \vfill
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_05.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_06.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_07.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_08.png}
+            \end{subfigure}%
+            \hfill
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/cart_pred_09.png}
+            \end{subfigure}
+            \vfill
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial4/hard/difficult_cart_pred_02.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial6/hard/difficult_cart_pred_05.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial6/hard/difficult_cart_pred_07.png}
+            \end{subfigure}%
+            \hfill
+            \centering
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial6/hard/difficult_cart_pred_11.png}
+            \end{subfigure}%
+            \hfill
+            \begin{subfigure}[t]{0.2\textwidth}
+                \centering
+                \includegraphics[width=1.0\textwidth,trim=0 0 0 0,clip]{../ml/pred_plots/trial6/hard/difficult_cart_pred_12.png}
+            \end{subfigure}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}{\mybox{green}{blue}{Summary}}
+        % \vspace{-0.1cm}
+        ``\ldots did a thing that is known to be bad and it was bad'' - known
+        \vspace{0.5cm}
+        \begin{itemize}
+            \item random data was not random
+            \item parameters too broad for too little data
+            \item many knobs to turn regarding data/parameter input and output
+            \item so many knobs to turn regarding ML algorithm / structure / solution approach
+        \end{itemize}
+        \vspace{0.5cm}
+        Takeaways: nothing, please!
     \end{frame}
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

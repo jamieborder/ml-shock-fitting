@@ -29,7 +29,20 @@ sys.path.append('..')
 from bezier import genBezierPoints
 from nn_diagram_template import *
 
-plt.rcParams['font.size'] = 16
+plt.rc(
+    'font',
+     **{
+        'size':16,
+        'family':'monospace',
+        'monospace':['DejaVu Serif'],
+        }
+     )
+
+tcm = cm.turbo(np.linspace(0.2,0.6,5))
+print(tcm)
+
+ISIZE = 5
+OSIZE = 7
 
 class Scale():
     def __init__(self):
@@ -64,16 +77,16 @@ class Param():
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.fc1 = Linear(5, 20)
-        self.fc2 = Linear(20, 20)
-        self.fc3 = Linear(20, 20)
-        self.fc4 = Linear(20, 7)
-        #self.fc1 = Linear(5, 10)
-        #self.fc2 = Linear(10, 10)
-        #self.fc3 = Linear(10, 10)
-        #self.fc4 = Linear(10, 7)
-        #self.fc1 = Linear(5, 10)
-        #self.fc2 = Linear(10, 7)
+        #self.fc1 = Linear(ISIZE, 20)
+        #self.fc2 = Linear(20, 20)
+        #self.fc3 = Linear(20, 20)
+        #self.fc4 = Linear(20, OSIZE)
+        self.fc1 = Linear(ISIZE, 10)
+        self.fc2 = Linear(10, 10)
+        self.fc3 = Linear(10, 10)
+        self.fc4 = Linear(10, OSIZE)
+        #self.fc1 = Linear(ISIZE, 10)
+        #self.fc2 = Linear(10, OSIZE)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -153,20 +166,22 @@ class Net(torch.nn.Module):
         print(f'generated graph in {filename}.png')
 
 class SFModel():
-    def __init__(self, training_data_filenames=None, epochs=0, enable_gpu=False, train=True):
+    def __init__(self, training_data_filenames=None, epochs=0, enable_gpu=False, train=True,
+            data_size_for_test=0,old_format=True):
+        self.old_format = old_format
         self.enable_gpu = enable_gpu
         #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.inputs = [
-                Param(),    # R1
-                Param(),    # R2
-                Param(),    # K1
-                Param(),    # K2
-                Param(),    # M
-                ]
-        self.outputs = [Param() for i in range(7)]  # coeffs
+        self.data_size = 0
+        # R2,K1,K2,M,T if old_format else R1,R2,K1,K2,M
+        self.inputs  = [Param() for i in range(ISIZE)]
+        self.outputs = [Param() for i in range(OSIZE)]  # coeffs
 
         if train:
             self.read_data(training_data_filenames)
+
+        self.data_size_for_test = data_size_for_test
+        if self.data_size_for_test > 0 and self.data_size > self.data_size_for_test:
+            self.extract_testing_data()
 
         self.scaled_data = False
         self.trained = False
@@ -190,6 +205,155 @@ class SFModel():
         self.iteration = []
         self.error_norm = []
         self.weights_loaded = False
+
+    def extract_testing_data(self):
+        testing_ids = np.arange(self.data_size)
+        np.random.shuffle(testing_ids)
+        testing_ids = testing_ids[:self.data_size_for_test]
+        self.testing_inputs  = np.empty((0,ISIZE));
+        self.testing_outputs = np.empty((0,OSIZE));
+        for i in range(len(testing_ids)):
+            k = testing_ids[i]
+            self.testing_inputs  = np.vstack(( self.testing_inputs,
+                np.array([self.inputs[j].data[k] for j in range(ISIZE)])[None,:] ))
+            self.testing_outputs = np.vstack(( self.testing_outputs,
+                np.array([self.outputs[j].data[k] for j in range(OSIZE)])[None,:] ))
+        for i in range(ISIZE):
+            self.inputs[i].data = np.delete(self.inputs[i].data, testing_ids)
+        for i in range(OSIZE):
+            self.outputs[i].data = np.delete(self.outputs[i].data, testing_ids)
+
+    def run_testing(self,plot=False,path='',tol=1e-2):
+        # theta distribution for polar error
+        thetas = np.linspace(0,1,100) * np.pi/2.0
+        l1err = 0.0
+        l1err_ = 0.0
+        pdist_err_pcnt = 0.0
+        cnt = 0
+        for i in range(self.data_size_for_test):
+            inp = self.testing_inputs[i,:]
+            pred = self.prediction(inp)
+            oup = self.testing_outputs[i,:]
+            l1err += np.sum(np.abs(oup - pred))
+
+            # radial coord for prediction (ps) and expected (es)
+            ps = np.zeros_like(thetas)
+            es = np.zeros_like(thetas)
+            for j in range(len(pred)):
+                ps += pred[j] * thetas**j
+            for j in range(len(oup)):
+                es += oup[j] * thetas**j
+
+            l1err_ += np.sum(np.abs(es - ps))
+            pdist_err_pcnt += np.sum( np.abs(ps - es) / es) / len(es)
+            if np.count_nonzero( np.abs(ps-es) < tol ) == len(ps):
+                cnt += 1
+
+            if plot:
+                # also map from polar to cartesian to visualise proper shock shape
+                # x = r cos(theta)
+                # y = r sin(theta)
+                xps = -ps * np.cos(thetas)
+                yps =  ps * np.sin(thetas)
+                xes = -es * np.cos(thetas)
+                yes =  es * np.sin(thetas)
+
+                plt.figure(i,figsize=(6,6))
+                plt.plot(xps,yps,'o-',label='prediction',c=tcm[0],mfc='none')
+                plt.plot(xes,yes,'.-',label='simulation',c=tcm[2])
+
+                # it is a bit awkard but we can create a Bezier curve of the surface
+                #  from the input params in cartesian space, and then map them to polar
+
+                p = np.zeros((4,2))
+                # input params:
+                if self.old_format:
+                    R2,K1,K2,M,T = inp; R1 = 1.0
+                else:
+                    R1,R2,K1,K2,M = inp
+                p[0,:] = [   -R1,     0]
+                p[1,:] = [   -R1, K1*R1]
+                p[2,:] = [-K2*R2,    R2]
+                p[3,:] = [     0,    R2]
+                ts = np.linspace(0,1,thetas.shape[0])
+                xy = genBezierPoints(p,ts.shape[0])
+
+                # plot in cartesian space
+                plt.plot(xy[:,0],xy[:,1],'k.-',label='surface')
+                plt.plot([xy[0,0],xes[0]],[xy[0,1],yes[0]],'-',c=tcm[2],zorder=0)
+                plt.plot([xy[-1,0],xes[-1]],[xy[-1,1],yes[-1]],'-',c=tcm[2],zorder=0)
+
+                plt.title(f'cartesian domain; M={M:.3f}')
+                plt.axis('equal')
+                plt.legend(loc='best')
+                plt.xlabel('x')
+                plt.ylabel('y')
+
+                plt.tight_layout()
+                plt.savefig(path+f'cart_pred_{i:02d}.png')
+                plt.clf()
+                plt.close()
+
+        l1err /= self.data_size_for_test
+        l1err_ /= self.data_size_for_test
+        pdist_err_pcnt /= self.data_size_for_test
+        print(f'l1 error norm for testing {self.data_size_for_test} samples = {l1err}')
+        print(f'l1 error norm in polar = {l1err_}')
+        print(f'dist error percentage in polar = {pdist_err_pcnt*100}')
+        print(f'number within tol {tol} = {cnt}')
+
+    def run_difficult_testing(self,inputs,plot=False,path=''):
+        # theta distribution for polar error
+        thetas = np.linspace(0,1,100) * np.pi/2.0
+        for i in range(len(inputs)):
+            inp = inputs[i,:]
+            pred = self.prediction(inp)
+
+            # radial coord for prediction (ps) and expected (es)
+            ps = np.zeros_like(thetas)
+            for j in range(len(pred)):
+                ps += pred[j] * thetas**j
+
+            # also map from polar to cartesian to visualise proper shock shape
+            # x = r cos(theta)
+            # y = r sin(theta)
+            xps = -ps * np.cos(thetas)
+            yps =  ps * np.sin(thetas)
+
+            plt.figure(i,figsize=(6,6))
+            plt.plot(xps,yps,'o-',label='prediction',c=tcm[0],mfc='none')
+
+            # it is a bit awkard but we can create a Bezier curve of the surface
+            #  from the input params in cartesian space, and then map them to polar
+
+            p = np.zeros((4,2))
+            # input params:
+            if self.old_format:
+                R2,K1,K2,M,T = inp; R1 = 1.0
+            else:
+                R1,R2,K1,K2,M = inp
+            p[0,:] = [   -R1,     0]
+            p[1,:] = [   -R1, K1*R1]
+            p[2,:] = [-K2*R2,    R2]
+            p[3,:] = [     0,    R2]
+            ts = np.linspace(0,1,thetas.shape[0])
+            xy = genBezierPoints(p,ts.shape[0])
+
+            # plot in cartesian space
+            plt.plot(xy[:,0],xy[:,1],'k.-',label='surface')
+            plt.plot([xy[0,0],xps[0]],[xy[0,1],yps[0]],'-',c=tcm[2],zorder=0)
+            plt.plot([xy[-1,0],xps[-1]],[xy[-1,1],yps[-1]],'-',c=tcm[2],zorder=0)
+
+            plt.title(f'cartesian domain; M={M:.3f}')
+            plt.axis('equal')
+            plt.legend(loc='best')
+            plt.xlabel('x')
+            plt.ylabel('y')
+
+            plt.tight_layout()
+            plt.savefig(path+f'difficult_cart_pred_{i:02d}.png')
+            plt.clf()
+            plt.close()
 
     def save_model(self,filename):
         torch.save(self.model.state_dict(), filename)
@@ -238,6 +402,8 @@ class SFModel():
             print(params.shape)
             for i in range(len(self.inputs)):
                 self.inputs[i].data = params[:,i]
+                if self.data_size == 0:
+                    self.data_size = params.shape[0]
 
             # coeffs -> [[a0, a1, ..., a6],...] for a_n * x**n
             coeffs = np.loadtxt(coeff_fns[0])
@@ -249,9 +415,9 @@ class SFModel():
 
             # need to know number of columns in params,coeffs already, to pre-allocate these arrays
             for i in range(len(self.inputs)):
-                self.inputs[i].data = np.empty((0,5))
+                self.inputs[i].data = np.empty((0,ISIZE))
             for i in range(len(self.outputs)):
-                self.outputs[i] = np.empty((0,7))
+                self.outputs[i] = np.empty((0,OSIZE))
 
             for j in range(len(param_fns)):
                 # params -> [[R2,K1,K2,M,T],...]
@@ -314,8 +480,10 @@ class SFModel():
         plt.plot(self.iteration,self.error_norm)
         plt.grid(True, color='black', linestyle='--', linewidth=0.5)
         plt.yscale("log")
-        plt.xlabel("Iterations/Epochs")
+        plt.xlabel("Iterations (aka Epochs)")
         plt.ylabel("Error norm")
+        plt.tight_layout()
+        plt.savefig('conv.png',dpi=300)
         plt.show()
 
 
@@ -328,6 +496,9 @@ if __name__ == "__main__":
 
     # check if just wanting to vis
     vis_only = os.getenv('VIS') != None
+
+    # check if using old format
+    old_format = os.getenv('OLD') != None
 
     # grab training data filename
     if len(sys.argv) < 3:
@@ -354,7 +525,14 @@ if __name__ == "__main__":
 
     # create the model and load the training data if training
     train = not vis_only
-    sf_model = SFModel([params,coeffs], 100000, enable_gpu, train=train)
+    sf_model = SFModel([params,coeffs],
+            1000000,
+            #1000,
+            enable_gpu,
+            train=train,
+            old_format=old_format,
+            data_size_for_test=10,
+            )
 
     if vis_only:
         sf_model.model.gen_diagram('nn_diagram')
@@ -385,7 +563,46 @@ if __name__ == "__main__":
     sf_model.save_model(f'./models/model{mid:02d}.pth')
     sf_model.save_mmm(f'./models/mmm{mid:02d}.dat')
 
-    # exit()
+
+    save_folder = 'trial4/'
+    save_folder = 'trial6/'
+    save_folder = 'trial7/'
+    #save_folder = 'trial5-all/'
+
+    sf_model.run_testing(plot=True,path='pred_plots/'+save_folder)
+
+    NH = 20
+    if old_format:
+        hard_inp = np.hstack((
+            (np.random.rand(NH) * 2.6 + 0.8)[:,None], # R2
+            (np.random.rand(NH) * 0.3 + 0.2)[:,None], # K1
+            (np.random.rand(NH) * 0.5      )[:,None], # K2
+            (np.random.rand(NH) * (8-2) + 2)[:,None], # M
+            (np.ones(NH)        * 300.0    )[:,None], # T
+            ))
+        hard_inp = np.vstack((
+            hard_inp,
+                np.hstack((
+                (np.random.rand(NH) * 0.6 + 0.3)[:,None], # R2
+                (np.random.rand(NH) * 0.1 + 0.1)[:,None], # K1
+                (np.random.rand(NH) * 0.1 + 0.1)[:,None], # K2
+                (np.random.rand(NH) * (8-2) + 2)[:,None], # M
+                (np.ones(NH)        * 300.0    )[:,None], # T
+                ))
+            ))
+    else:
+        hard_inp = np.hstack((
+            (np.random.rand(NH) * 1.2 + 0.9)[:,None], # R1
+            (np.random.rand(NH) * 0.6 + 0.6)[:,None], # R2
+            (np.random.rand(NH) * 0.3 + 0.2)[:,None], # K1
+            (np.random.rand(NH)            )[:,None], # K2
+            (np.random.rand(NH) * (8-2) + 2)[:,None], # M
+            ))
+    sf_model.run_difficult_testing(hard_inp,plot=False,path='pred_plots/'+save_folder+'/hard/')
+
+    np.savetxt('pred_plots/'+save_folder+'/hard/hard_inp.dat',hard_inp)
+
+    exit()
 
     # test the model
     # input params: R2,K1,K2,M,T
